@@ -1,11 +1,10 @@
 import pandas as pd
 from sqlalchemy import create_engine, text
-from config import POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB
+from config import POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB, POSTGRES_HOSTNAME, POSTGRES_PORT
 import logging
 
 def get_connection():
-    logging.info(f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}")
-    engine = create_engine(f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}")
+    engine = create_engine(f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOSTNAME}:{POSTGRES_PORT}/{POSTGRES_DB}")
     return engine
 
 def run_query(query, params=None):
