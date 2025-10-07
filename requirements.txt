@@ -1,0 +1,9 @@
+streamlit~=1.50.0
+psycopg2-binary
+sqlalchemy~=2.0.43
+pandas~=2.3.2
+scikit-learn~=1.7.2
+joblib~=1.5.2
+numpy~=2.3.3
+plotly~=6.3.0
+python-dotenv~=1.1.1
