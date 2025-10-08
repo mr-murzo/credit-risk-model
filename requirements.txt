@@ -6,3 +6,5 @@ scikit-learn~=1.7.2
 joblib~=1.5.2
 plotly~=6.3.0
 python-dotenv~=1.1.1
+numpy~=2.3.3
+imbalanced-learn~=0.14.0
