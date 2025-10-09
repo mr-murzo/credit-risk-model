@@ -1,13 +1,13 @@
-# 🚀 Loan Default Prediction — End-to-End ML System (SQL → ETL → ML → Streamlit + Docker)
+# 🚀 Loan Default Prediction — End-to-End ML System (SQL → ELT → ML → Streamlit + Docker)
 
-An **end-to-end Loan Default Prediction System** that automates data ingestion, ETL, model training, and interactive analytics — all deployed via **Docker**.
+An **end-to-end Loan Default Prediction System** that automates data ingestion, ELT, model training, and interactive analytics — all deployed via **Docker**.
 
 ---
 
 ## 🌟 Overview
 
 This project demonstrates how **Data Engineering + Machine Learning + MLOps** come together in a production-style workflow.  
-It handles everything — from CSV uploads and database ETL, to retraining ML models and visualizing predictions in a Streamlit dashboard.
+It handles everything — from CSV uploads and database ELT, to retraining ML models and visualizing predictions in a Streamlit dashboard.
 
 **Core Stack:**  
 - 🐍 Python (pandas, scikit-learn, imblearn, plotly, streamlit)  
