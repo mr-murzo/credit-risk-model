@@ -13,7 +13,7 @@ It handles everything — from CSV uploads and database ETL, to retraining ML mo
 - 🐍 Python (pandas, scikit-learn, imblearn, plotly, streamlit)  
 - 🗄️ PostgreSQL (ETL + data validation + warehouse)  
 - 🐳 Docker & Docker Compose (deployment)  
-- ⚙️ SQL Stored Procedures for ETL  
+- ⚙️ SQL Stored Procedures for ELT  
 - 🔐 Environment variables via `.env`
 
 ---
@@ -23,10 +23,10 @@ It handles everything — from CSV uploads and database ETL, to retraining ML mo
 **Schemas:**
 - **raw:** Incoming unvalidated uploads  
 - **fact:** Clean, validated tables ready for ML  
-- **etl_log:** Tracks each ETL run  
+- **etl_log:** Tracks each ELT run  
 - **loans_rejects:** Stores rejected rows with reasons  
 
-**ETL Highlights:**
+**ELT Highlights:**
 - Deduplication via `DISTINCT ON` and `ON CONFLICT DO NOTHING`  
 - Logs every run in `etl_log` (with timestamps + counts)  
 - Invalid rows (bad types, missing data) moved to `fact.loans_rejects`
@@ -59,7 +59,7 @@ It handles everything — from CSV uploads and database ETL, to retraining ML mo
    - Default rate by age, education, DTI
 
 **UI flow:**  
-Upload → ETL → Retrain → Predict → Analyze 📊
+Upload → ELT → Retrain → Predict → Analyze 📊
 
 ---
 
@@ -71,7 +71,7 @@ Upload → ETL → Retrain → Predict → Analyze 📊
 - Re-inserts prevented via `ON CONFLICT (loan_uuid) DO NOTHING`.  
 - Faulty rows logged to rejects table for inspection.  
 
-Result: **ETL is idempotent, auditable, and safe**.
+Result: **ELT is idempotent, auditable, and safe**.
 
 ---
 
