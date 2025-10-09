@@ -46,13 +46,6 @@ It handles everything — from CSV uploads and database ETL, to retraining ML mo
 - Log transformation on skewed features (e.g. income, loan amount)  
 - `ColumnTransformer` for scaling + one-hot encoding  
 - **SMOTE applied** to balance class distribution before training  
- 
-
-Saved artifacts:  
-- `loan_model_logreg.pkl`  
-- `loan_model_rf.pkl`  
-- `preprocessor.pkl`  
-- `model_scores.pkl`
 
 ---
 
@@ -88,7 +81,8 @@ A sample CSV (`sample_loans.csv`) is provided to simulate real loan applications
 Upload it in the app to test the full ETL + retrain + predict pipeline.
 
 A sample CSV (`invalid_sample_loans.csv`) is provided to test if faulty to check if 
-it is being rejected or not .
+it is being rejected or not.
+
 ---
 
 ## ⚙️ Run Locally (Dockerized Setup)
