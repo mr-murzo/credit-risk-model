@@ -22,40 +22,66 @@ if page == "Upload Data":
     password = st.text_input("Enter password:", type="password")
 
     if password == UPLOAD_PASSWORD:
-        st.info("INSTRUCTIONS FOR UPLOAD")
-        st.info("YOUR CSV FILE SHOULD ONLY CONTAIN THESE COLUMNS AND IN ORDER:")
-        st.info(
-            "person_age INT, person_gender TEXT, person_education TEXT, person_income FLOAT, "
-            "person_emp_exp INT, person_home_ownership TEXT, loan_amnt FLOAT, loan_intent TEXT, "
-            "loan_int_rate FLOAT, loan_percent_income FLOAT, cb_person_cred_hist_length INT, "
-            "credit_score FLOAT, previous_loan_defaults_on_file TEXT, loan_status INT"
-        )
+        st.info("### INSTRUCTIONS FOR UPLOAD")
+        st.info("Your CSV file should contain *only* these columns (order doesn’t matter):")
+        required_columns = [
+            "person_age", "person_gender", "person_education", "person_income",
+            "person_emp_exp", "person_home_owner", "loan_amnt", "loan_intent",
+            "loan_int_rate", "loan_percent_income", "cb_person_cred_hist_length",
+            "credit_score", "previous_loan_defaults_on_file", "loan_status"
+        ]
+        st.code(", ".join(required_columns))
 
+        # Display upload history
         query = "SELECT * FROM raw.etl_log;"
         dfd = pd.DataFrame(db.run_query(query))
         st.write("UPLOAD HISTORY:", dfd)
 
         uploaded_file = st.file_uploader("Upload CSV File", type=["csv"])
+
         if uploaded_file:
-            df = pd.read_csv(uploaded_file)
-            st.write("Preview:", df.head())
-            if st.button("Insert → Run ETL → Retrain"):
-                try:
-                    insert_raw_loans(df)
-                    st.info("Inserted to raw.loans")
+            try:
+                df = pd.read_csv(uploaded_file)
+                df.columns = df.columns.str.strip()  # remove spaces
 
-                    run_etl()
-                    st.info("ETL run completed")
+                missing_cols = [c for c in required_columns if c not in df.columns]
+                extra_cols = [c for c in df.columns if c not in required_columns]
 
-                    acc_lg, acc_rf = train_and_save_models()
-                    st.success("Models retrained and saved.")
-                    st.write(f"Logistic Regression: {acc_lg:.2%}")
-                    st.write(f"Random Forest: {acc_rf:.2%}")
-                except Exception as e:
-                    st.error(f"Error: {e}")
+                if missing_cols:
+                    st.error(f"❌ Missing required columns: {missing_cols}")
+                elif extra_cols:
+                    st.error(f"❌ Extra columns found: {extra_cols}")
+                else:
+                    # Reorder columns to match required structure
+                    df = df[required_columns]
+                    st.success("✅ File validated successfully!")
+                    st.write("Preview:", df.head())
+
+
+                    df = df.astype(str)
+
+                    if st.button("Insert → Run ETL → Retrain"):
+                        try:
+                            insert_raw_loans(df)
+                            st.info("✅ Inserted to raw.loans")
+
+                            run_etl()
+                            st.info("✅ ETL run completed")
+
+                            acc_lg, acc_rf = train_and_save_models()
+                            st.success("✅ Models retrained and saved successfully.")
+                            st.write(f"*Logistic Regression Accuracy:* {acc_lg:.2%}")
+                            st.write(f"*Random Forest Accuracy:* {acc_rf:.2%}")
+
+                        except Exception as e:
+                            st.error(f"⚠️ Error during ETL or training: {e}")
+
+            except Exception as e:
+                st.error(f"⚠️ Failed to read file: {e}")
+
     else:
         if password:
-            st.error("Wrong password.")
+            st.error("🚫 Wrong password.")
 
 elif page == "Make Predictions":
     st.title("Loan Approval Prediction")
@@ -115,16 +141,9 @@ elif page == "Make Predictions":
 
 elif page == "Dashboard":
     st.title("📊 Loan Default Dashboard")
-
-    # ----------------------------
-    # Load data
-    # ----------------------------
     query = "SELECT * FROM vw_ml_loan;"
     df = pd.DataFrame(db.run_query(query))
 
-    # ----------------------------
-    # Feature Engineering
-    # ----------------------------
     def bucket_dti(dti):
         if dti <= 0.2:
             return "Low Leverage"
@@ -144,9 +163,6 @@ elif page == "Dashboard":
         df["default"] = df["loan_status"].apply(lambda x: 1 if x == 1 else 0)
         df["emp_exp_years"] = (df["person_emp_exp"] // 12).astype(int)
 
-        # ----------------------------
-        # KPIs
-        # ----------------------------
         total_loans = len(df)
         total_defaults = df["default"].sum()
         default_rate = round(total_defaults / total_loans * 100, 2)
@@ -158,9 +174,6 @@ elif page == "Dashboard":
 
         st.markdown("---")
 
-        # ----------------------------
-        # Gender Pie Chart
-        # ----------------------------
         default_counts = (
             df[df["default"] == 1]
             .groupby("person_gender")
@@ -177,9 +190,6 @@ elif page == "Dashboard":
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # ----------------------------
-        # Age Distribution
-        # ----------------------------
         df["person_age"] = pd.to_numeric(df["person_age"])
         age_summary = (
             df.assign(default=df["default"].map({0: "No", 1: "Yes"}))
@@ -201,9 +211,6 @@ elif page == "Dashboard":
         )
         st.plotly_chart(fig_age, use_container_width=True)
 
-        # ----------------------------
-        # Education vs Defaults
-        # ----------------------------
         edu_summary = df.groupby("person_education")["default"].agg(
             total_default="sum",
             total_loans="count",
@@ -224,9 +231,6 @@ elif page == "Dashboard":
         )
         st.plotly_chart(fig_edu, use_container_width=True)
 
-        # ----------------------------
-        # Experience vs Defaults
-        # ----------------------------
         exp_summary = df.groupby("emp_exp_years")["default"].agg(
             total_default="sum",
             total_loans="count",
@@ -247,9 +251,6 @@ elif page == "Dashboard":
         )
         st.plotly_chart(fig_exp, use_container_width=True)
 
-        # ----------------------------
-        # DTI vs Defaults
-        # ----------------------------
         dti_summary = df.groupby("dti_bucket")["default"].agg(
             total_default="sum",
             total_loans="count",
@@ -270,9 +271,6 @@ elif page == "Dashboard":
         )
         st.plotly_chart(fig_dti, use_container_width=True)
 
-        # ----------------------------
-        # Previous Default History
-        # ----------------------------
         if "previously_defaulted" in df.columns:
             prev_summary = df.groupby("previously_defaulted")["default"].agg(
                 total_default="sum",

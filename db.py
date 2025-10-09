@@ -25,7 +25,7 @@ def run_etl():
         conn.close()
 
 def insert_raw_loans(df: pd.DataFrame):
-    df = df.dropna(how="all")  # drop completely empty rows
+    df = df.dropna(how="all")
     engine = get_connection()
     df.to_sql("loans", engine, schema="raw", if_exists="append", index=False)
 

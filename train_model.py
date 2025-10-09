@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import joblib
-from db import get_connection  # expects db.get_connection() returning SQLAlchemy engine
+from db import get_connection
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -15,9 +15,6 @@ from imblearn.pipeline import Pipeline as ImbPipeline  # IMPORTANT
 from imblearn.over_sampling import SMOTE
 
 
-# ================================================================
-# Configuration
-# ================================================================
 FEATURE_COLS = [
     "person_age",
     "person_gender",
@@ -35,11 +32,7 @@ FEATURE_COLS = [
 ]
 
 
-# ================================================================
-# Helper Functions
-# ================================================================
 def normalize_gender(x):
-    """Standardize gender entries to 'M', 'F', or 'U'."""
     s = str(x).strip().lower() if pd.notna(x) else ""
     if s in ["male", "m"]:
         return "M"
@@ -49,7 +42,6 @@ def normalize_gender(x):
 
 
 def bucket_age(age):
-    """Convert numeric age into categorical buckets."""
     try:
         a = int(age)
     except Exception:
@@ -65,7 +57,6 @@ def bucket_age(age):
 
 
 def bucket_emp_exp(exp):
-    """Convert months of employment into categorical experience levels."""
     try:
         e = int(exp)
     except Exception:
@@ -79,12 +70,7 @@ def bucket_emp_exp(exp):
     else:
         return "HIGH"
 
-
-# ================================================================
-# Preprocessing
-# ================================================================
 def preprocess_data(df: pd.DataFrame):
-    """Clean, transform, and prepare the dataset for training."""
 
     required = set(FEATURE_COLS + ["loan_status"])
     missing = required - set(df.columns)
@@ -93,7 +79,6 @@ def preprocess_data(df: pd.DataFrame):
 
     df = df.copy()
 
-    # Define numeric and categorical columns
     numeric_cols = [
         "person_income",
         "loan_amnt",
@@ -113,24 +98,19 @@ def preprocess_data(df: pd.DataFrame):
         "previous_loan_defaults_on_file"
     ]
 
-    # Convert numeric columns safely
     for c in numeric_cols:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    # Drop rows missing essential numeric or target fields
     df = df.dropna(subset=["loan_status"] + numeric_cols)
     df = df.reset_index(drop=True)
 
-    # Apply categorical transformations
     df["person_gender"] = df["person_gender"].apply(normalize_gender)
     df["person_age"] = df["person_age"].apply(bucket_age)
     df["person_emp_exp"] = df["person_emp_exp"].apply(bucket_emp_exp)
 
-    # Define X and y
     X = df[FEATURE_COLS].copy()
     y = df["loan_status"].astype(int).copy()
 
-    # Build preprocessing pipeline
     log_transformer = FunctionTransformer(np.log1p, validate=True)
     numeric_transformer = Pipeline(steps=[
         ("log", log_transformer),
@@ -147,26 +127,18 @@ def preprocess_data(df: pd.DataFrame):
 
     return X, y, preprocessor
 
-
-# ================================================================
-# Training Function
-# ================================================================
 def train_and_save_models(df: pd.DataFrame = None):
-    """Train both Logistic Regression and Random Forest with SMOTE handling."""
 
-    # Load data from database if not provided
     if df is None:
         engine = get_connection()
         df = pd.read_sql("SELECT * FROM vw_ml_loan", con=engine)
 
     X, y, preprocessor = preprocess_data(df)
 
-    # Split dataset
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, random_state=42, stratify=y
     )
 
-    # Pipelines with SMOTE inside
     logreg_pipeline = ImbPipeline([
         ("preprocessor", preprocessor),
         ("smote", SMOTE(random_state=42)),
@@ -179,15 +151,12 @@ def train_and_save_models(df: pd.DataFrame = None):
         ("clf", RandomForestClassifier(n_estimators=200, random_state=42))
     ])
 
-    # Train models
     logreg_pipeline.fit(X_train, y_train)
     rf_pipeline.fit(X_train, y_train)
 
-    # Evaluate
     acc_logreg = accuracy_score(y_test, logreg_pipeline.predict(X_test))
     acc_rf = accuracy_score(y_test, rf_pipeline.predict(X_test))
 
-    # Save models
     joblib.dump(logreg_pipeline, "loan_model_logreg.pkl")
     joblib.dump(rf_pipeline, "loan_model_rf.pkl")
     joblib.dump({"Logistic Regression": acc_logreg, "Random Forest": acc_rf}, "model_scores.pkl")
