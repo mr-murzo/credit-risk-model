@@ -12,22 +12,6 @@ This project demonstrates how **Data Engineering + Machine Learning + MLOps** co
 
 ---
 
-## 📚 Table of Contents
-
-* [Quick Start — Run Locally (Dockerized)](#quick-start--run-locally-dockerized)
-* [Run Locally — Without Docker (Manual)](#run-locally--without-docker-manual)
-* [Architecture](#architecture)
-* [Machine Learning Pipeline](#machine-learning-pipeline)
-* [Streamlit App](#streamlit-app)
-* [Duplicate & Reupload Protection](#duplicate--reupload-protection)
-* [Sample Datasets](#sample-datasets)
-* [Development & Tests](#development--tests)
-* [Contributing](#contributing)
-* [License](#license)
-
-
----
-
 ## ⚙️ Quick Start — Run Locally (Dockerized)
 
 > The preferred way to run everything (Postgres + Streamlit + ETL) is via Docker Compose.
