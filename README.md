@@ -6,86 +6,30 @@ An **end-to-end Loan Default Prediction System** that automates data ingestion, 
 
 ## 🌟 Overview
 
-This project demonstrates how **Data Engineering + Machine Learning + MLOps** come together in a production-style workflow.  
-It handles everything — from CSV uploads and database ELT, to retraining ML models and visualizing predictions in a Streamlit dashboard.
+This project demonstrates how **Data Engineering + Machine Learning + MLOps** come together in a production-style workflow. It handles everything — from CSV uploads and database ELT, to retraining ML models and visualizing predictions in a Streamlit dashboard.
 
-**Core Stack:**  
-- 🐍 Python (pandas, scikit-learn, imblearn, plotly, streamlit)  
-- 🗄️ PostgreSQL (ETL + data validation + warehouse)  
-- 🐳 Docker & Docker Compose (deployment)  
-- ⚙️ SQL Stored Procedures for ELT  
-- 🔐 Environment variables via `.env`
+**Core Stack:** Python (pandas, scikit-learn, imblearn, plotly, streamlit), PostgreSQL, Docker & Docker Compose, SQL stored procedures, environment variables via `.env`.
 
 ---
 
-## 🧱 Architecture
+## 📚 Table of Contents (Index)
 
-**Schemas:**
-- **raw:** Incoming unvalidated uploads  
-- **fact:** Clean, validated tables ready for ML  
-- **etl_log:** Tracks each ELT run  
-- **loans_rejects:** Stores rejected rows with reasons  
-
-**ELT Highlights:**
-- Deduplication via `DISTINCT ON` and `ON CONFLICT DO NOTHING`  
-- Logs every run in `etl_log` (with timestamps + counts)  
-- Invalid rows (bad types, missing data) moved to `fact.loans_rejects`
-
----
-
-## 🧠 Machine Learning Pipeline
-
-**Models:**  
-- Logistic Regression  
-- Random Forest  
-
-**Preprocessing Includes:**  
-- Age bucketing (YOUNG, MIDDLE-AGE, OLD, VERY-OLD)  
-- Employment experience bucketed into year bins  
-- DTI (loan_percent_income) bucketed by leverage  
-- Log transformation on skewed features (e.g. income, loan amount)  
-- `ColumnTransformer` for scaling + one-hot encoding  
-- **SMOTE applied** to balance class distribution before training  
+* [Quick Start — Run Locally (Dockerized)](#quick-start--run-locally-dockerized)
+* [Run Locally — Without Docker (Manual)](#run-locally---without-docker-manual)
+* [Architecture](#architecture)
+* [Schemas & ELT](#schemas--elt)
+* [Machine Learning Pipeline](#machine-learning-pipeline)
+* [Streamlit App](#streamlit-app)
+* [Duplicate & Reupload Protection](#duplicate--reupload-protection)
+* [Sample Datasets](#sample-datasets)
+* [Development & Tests](#development--tests)
+* [Contributing](#contributing)
 
 ---
 
-## 💻 Streamlit App
+## ⚙️ Quick Start — Run Locally (Dockerized)
 
-**Pages:**
-1. **Upload Data** → password-protected → inserts raw CSV → triggers ETL → retrains model  
-2. **Make Predictions** → select model → input borrower details → view prediction  
-3. **Dashboard** → KPIs + visuals  
-   - Total loans, defaults, default rate  
-   - Default rate by age, education, DTI
-
-**UI flow:**  
-Upload → ELT → Retrain → Predict → Analyze 📊
-
----
-
-## 🔁 Duplicate & Reupload Protection
-
-**How it works:**
-- Only new uploads processed (based on latest ETL timestamp).  
-- Duplicates in the same file removed via `DISTINCT ON`.  
-- Re-inserts prevented via `ON CONFLICT (loan_uuid) DO NOTHING`.  
-- Faulty rows logged to rejects table for inspection.  
-
-Result: **ELT is idempotent, auditable, and safe**.
-
----
-
-## 🧠 Sample Dataset
-
-A sample CSV (`sample_loans.csv`) is provided to simulate real loan applications.  
-Upload it in the app to test the full ETL + retrain + predict pipeline.
-
-A sample CSV (`invalid_sample_loans.csv`) is provided to test if faulty to check if 
-it is being rejected or not.
-
----
-
-## ⚙️ Run Locally (Dockerized Setup)
+> The preferred way to run everything (Postgres + Streamlit + ETL) is via Docker Compose.
 
 ```bash
 # 1️⃣ Clone the repo
@@ -104,78 +48,157 @@ docker compose up -d --build
 http://localhost:8501
 ```
 
-## 🚀 Running Locally Without Docker
+**Notes:**
+
+* The `initdb` folder contains SQL scripts that initialize schemas (`raw`, `fact`, `etl_log`, `loans_rejects`) and any seed data.
+* Environment variables are read from a `.env` file in the project root (see below).
+
+---
+
+## 🚀 Running Locally Without Docker (Manual)
+
+### Prerequisites
+
+* Python 3.11 (or compatible)
+* PostgreSQL 15
+
+### Steps
+
+1. **Install PostgreSQL** (example):
 
 ```bash
-### Prerequisites
-You'll need to install these locally:
-1. *Python 3.11* (as specified in the Dockerfile)
-2. *PostgreSQL 15* (as specified in docker-compose.yml)
-
-### Step 1: Set up PostgreSQL Database
-
-*Install PostgreSQL:*
-bash
-# On macOS with Homebrew
+# macOS (Homebrew)
 brew install postgresql@15
 brew services start postgresql@15
 
-# On Ubuntu/Debian
+# Ubuntu/Debian
 sudo apt update
 sudo apt install postgresql-15 postgresql-client-15
 sudo systemctl start postgresql
+```
 
+2. **Create database and user**
 
-*Create database and user:*
-bash
-# Connect to PostgreSQL
-psql postgres
-
-# In PostgreSQL shell:
+```sql
+-- Connect to psql and run:
 CREATE DATABASE credit_risk_db;
 CREATE USER credit_user WITH PASSWORD 'your_password';
 GRANT ALL PRIVILEGES ON DATABASE credit_risk_db TO credit_user;
-\q
+```
 
+3. **Create .env file** (project root)
 
-### Step 2: Create Environment File
-
-Create a .env file in the project root:
-bash
-# .env
+```
 POSTGRES_USER=credit_user
 POSTGRES_PASSWORD=your_password
 POSTGRES_DB=credit_risk_db
 POSTGRES_HOSTNAME=localhost
 POSTGRES_PORT=5432
 UPLOAD_PASSWORD=admin123
-
-
-### Step 3: Install Python Dependencies
-
-bash
-# Create virtual environment (recommended)
-python3.11 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-
-### Step 4: Initialize Database Schema
-
-bash
-# Run the SQL initialization script
-psql -h localhost -U credit_user -d credit_risk_db -f initdb/01_init.sql
-
-
-### Step 6: Run the Application
-
-bash
-# Start the Streamlit app
-streamlit run app.py --server.enableCORS false --server.enableXsrfProtection false
-
-
-The app will be available at http://localhost:8501
-
 ```
+
+4. **Install Python dependencies**
+
+```bash
+python3.11 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+5. **Initialize database schema**
+
+```bash
+psql -h localhost -U credit_user -d credit_risk_db -f initdb/01_init.sql
+```
+
+6. **Run Streamlit app**
+
+```bash
+streamlit run app.py --server.enableCORS false --server.enableXsrfProtection false
+```
+
+Visit `http://localhost:8501`.
+
+---
+
+## 🧱 Architecture
+
+**Schemas:**
+
+* `raw` — incoming unvalidated uploads
+* `fact` — cleaned, validated data ready for ML
+* `etl_log` — tracks each ELT run (timestamps, counts)
+* `loans_rejects` — rejected rows with rejection reasons
+
+**ELT highlights:** deduplication (via `DISTINCT ON`), idempotent inserts (`ON CONFLICT DO NOTHING`), rejected-row logging, run-level logging in `etl_log`.
+
+---
+
+## 🧠 Machine Learning Pipeline
+
+**Models:** Logistic Regression, Random Forest
+
+**Preprocessing:**
+
+* Age bucketing (e.g., YOUNG, MIDDLE-AGE, OLD, VERY-OLD)
+* Employment experience bucketed into year bins
+* DTI (loan_percent_income) bucketed into leverage slabs
+* Log transform for skewed features (income, loan_amount)
+* `ColumnTransformer` for scaling + one-hot encoding
+* **SMOTE** to balance classes when training
+
+**Training flow:**
+
+1. Pull cleaned `fact.loans` from Postgres
+2. Apply feature engineering & preprocessing
+3. Resample (SMOTE) on training set
+4. Fit model(s), evaluate, persist best model artifacts
+
+---
+
+## 💻 Streamlit App
+
+**Pages:**
+
+1. **Upload Data** — password-protected endpoint that inserts raw CSVs, triggers ELT, and retrains models.
+2. **Make Predictions** — choose model, enter borrower details, get prediction + probabilities.
+3. **Dashboard** — KPIs and visuals (total loans, defaults, default rate, breakdowns by age/education/DTI).
+
+**UI flow:** Upload → ELT → Retrain → Predict → Analyze
+
+---
+
+## 🔁 Duplicate & Reupload Protection
+
+* New uploads processed only when newer than the latest ETL timestamp.
+* Duplicates removed inside files using `DISTINCT ON`.
+* DB-level duplicate protection using `ON CONFLICT (loan_uuid) DO NOTHING`.
+* Faulty rows recorded in `fact.loans_rejects` with reasons.
+* `etl_log` provides run-level auditing (counts, timestamps, status).
+
+---
+
+## 📂 Sample Datasets
+
+* `sample_loans.csv` — valid sample to exercise the full pipeline
+* `invalid_sample_loans.csv` — intentionally malformed rows to test rejection handling
+
+---
+
+## 🧪 Development & Tests
+
+* Ensure `.env` variables are set before running.
+* Use `initdb` SQL scripts when resetting the DB.
+* If you need a fresh DB state, drop the DB and re-run `initdb` scripts (or remove docker volume when using Docker).
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome. Please:
+
+1. Open an issue describing the change
+2. Create a feature branch
+3. Submit a PR with tests and documentation
+
+---
