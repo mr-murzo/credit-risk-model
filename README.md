@@ -87,7 +87,7 @@ it is being rejected or not.
 
 ## ⚙️ Run Locally (Dockerized Setup)
 
-```md
+```bash
 # 1️⃣ Clone the repo
 git clone https://github.com/mr-murzo/credit-risk-model.git
 
@@ -102,9 +102,11 @@ docker compose up -d --build
 
 # 5️⃣ Visit Streamlit app
 http://localhost:8501
+```
 
 ## 🚀 Running Locally Without Docker
 
+```bash
 ### Prerequisites
 You'll need to install these locally:
 1. *Python 3.11* (as specified in the Dockerfile)
@@ -176,3 +178,4 @@ streamlit run app.py --server.enableCORS false --server.enableXsrfProtection fal
 
 The app will be available at http://localhost:8501
 
+```
