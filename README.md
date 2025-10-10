@@ -106,16 +106,79 @@ Visit `http://localhost:8501`.
 
 ---
 
-## 🧱 Architecture
+## 🗄️ Backend & Database (PostgreSQL)
 
-**Schemas:**
+The backend layer of this project is powered by PostgreSQL and serves as the single source of truth for all raw, cleaned, and processed data. It is structured for data integrity, traceability, and idempotent ETL operations.
 
-* `raw` — incoming unvalidated uploads
-* `fact` — cleaned, validated data ready for ML
-* `etl_log` — tracks each ELT run (timestamps, counts)
-* `loans_rejects` — rejected rows with rejection reasons
+⚙️ Database Architecture
 
-**ELT highlights:** deduplication (via `DISTINCT ON`), idempotent inserts (`ON CONFLICT DO NOTHING`), rejected-row logging, run-level logging in `etl_log`.
+Schemas:
+
+raw → stores unvalidated uploads from Streamlit
+
+fact → stores cleaned and validated records used for ML
+
+raw.etl_log → audit table that records each ETL run, including counts of successful and rejected rows
+
+fact.loans_rejects → stores rejected rows with error_reason for debugging
+
+
+Tables Overview:
+
+Table	Purpose
+
+raw.loans	Direct ingestion from user uploads (all columns stored as text)
+fact.loans	Cleaned and strongly typed data for ML & analytics
+raw.etl_log	ETL process metadata (timestamps, success/reject counts)
+fact.loans_rejects	Invalid rows with detailed error messages
+
+
+Materialized View:
+
+vw_ml_loan
+→ Combines data from fact.loans into a flattened, analysis-ready dataset for ML pipelines and dashboard visualizations.
+
+---
+
+🧩 ETL Process Overview
+
+The ETL is safe, repeatable, and auditable — implemented as a SQL stored procedure and invoked from the Streamlit app.
+
+Key Features
+
+1. Idempotent Loads
+Only new rows (based on uploaded_at > last_run_time) are processed to avoid duplication.
+
+SELECT * FROM raw.loans
+WHERE (v_last_run IS NULL OR uploaded_at > v_last_run);
+
+
+2. Duplicate Handling
+Deduplication inside each batch using DISTINCT ON (...), ensuring only unique rows are promoted to the fact layer.
+
+
+3. Validation & Reject Logging
+Rows failing validation rules are logged to fact.loans_rejects with descriptive error messages.
+
+Example:
+
+CASE 
+  WHEN credit_score NOT BETWEEN 300 AND 850 THEN 'Invalid credit score'
+  WHEN person_age !~ '^[0-9]+$' THEN 'Non-numeric age'
+  ELSE NULL
+END AS error_reason
+
+
+4. ETL Audit Logging
+Every ETL run inserts a record into raw.etl_log capturing:
+
+Timestamp
+
+Success count
+
+Reject count
+
+Execution status
 
 ---
 
