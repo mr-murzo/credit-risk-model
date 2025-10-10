@@ -103,5 +103,76 @@ docker compose up -d --build
 # 5️⃣ Visit Streamlit app
 http://localhost:8501
 
+## 🚀 Running Locally Without Docker
 
+### Prerequisites
+You'll need to install these locally:
+1. *Python 3.11* (as specified in the Dockerfile)
+2. *PostgreSQL 15* (as specified in docker-compose.yml)
+
+### Step 1: Set up PostgreSQL Database
+
+*Install PostgreSQL:*
+bash
+# On macOS with Homebrew
+brew install postgresql@15
+brew services start postgresql@15
+
+# On Ubuntu/Debian
+sudo apt update
+sudo apt install postgresql-15 postgresql-client-15
+sudo systemctl start postgresql
+
+
+*Create database and user:*
+bash
+# Connect to PostgreSQL
+psql postgres
+
+# In PostgreSQL shell:
+CREATE DATABASE credit_risk_db;
+CREATE USER credit_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE credit_risk_db TO credit_user;
+\q
+
+
+### Step 2: Create Environment File
+
+Create a .env file in the project root:
+bash
+# .env
+POSTGRES_USER=credit_user
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=credit_risk_db
+POSTGRES_HOSTNAME=localhost
+POSTGRES_PORT=5432
+UPLOAD_PASSWORD=admin123
+
+
+### Step 3: Install Python Dependencies
+
+bash
+# Create virtual environment (recommended)
+python3.11 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+
+### Step 4: Initialize Database Schema
+
+bash
+# Run the SQL initialization script
+psql -h localhost -U credit_user -d credit_risk_db -f initdb/01_init.sql
+
+
+### Step 6: Run the Application
+
+bash
+# Start the Streamlit app
+streamlit run app.py --server.enableCORS false --server.enableXsrfProtection false
+
+
+The app will be available at http://localhost:8501
 
