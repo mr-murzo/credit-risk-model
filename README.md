@@ -14,7 +14,7 @@ This project demonstrates how **Data Engineering + Machine Learning + MLOps** co
 
 ## ⚙️ Quick Start — Run Locally (Dockerized)
 
-> The preferred way to run everything (Postgres + Streamlit + ETL) is via Docker Compose.
+> The preferred way to run everything (Postgres + Streamlit + ELT) is via Docker Compose.
 
 ```bash
 # 1️⃣ Clone the repo
@@ -108,7 +108,7 @@ Visit `http://localhost:8501`.
 
 ## 🗄️ Backend & Database (PostgreSQL)
 
-The backend layer of this project is powered by PostgreSQL and serves as the single source of truth for all raw, cleaned, and processed data. It is structured for data integrity, traceability, and idempotent ETL operations.
+The backend layer of this project is powered by PostgreSQL and serves as the single source of truth for all raw, cleaned, and processed data. It is structured for data integrity, traceability, and idempotent ELT operations.
 
 ⚙️ Database Architecture
 
@@ -140,9 +140,9 @@ vw_ml_loan
 
 ---
 
-🧩 ETL Process Overview
+🧩 ELT Process Overview
 
-The ETL is safe, repeatable, and auditable — implemented as a SQL stored procedure and invoked from the Streamlit app.
+The ELT is safe, repeatable, and auditable — implemented as a SQL stored procedure and invoked from the Streamlit app.
 
 Key Features
 
@@ -169,7 +169,7 @@ CASE
 END AS error_reason
 
 
-4. ETL Audit Logging
+4. ELT Audit Logging
 Every ETL run inserts a record into raw.etl_log capturing:
 
 Timestamp
@@ -228,8 +228,7 @@ Execution status
 
 ## 📂 Sample Datasets
 
-* `sample_loans.csv` — valid sample to exercise the full pipeline
-* `invalid_sample_loans.csv` — intentionally malformed rows to test rejection handling
+* `sample_data folder contains 4 valid sample data and 1 sample with invalid data
 
 ---
 
