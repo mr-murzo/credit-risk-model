@@ -87,7 +87,7 @@ it is being rejected or not.
 
 ## ⚙️ Run Locally (Dockerized Setup)
 
-```bash
+```md
 # 1️⃣ Clone the repo
 git clone https://github.com/mr-murzo/credit-risk-model.git
 
