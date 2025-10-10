@@ -14,16 +14,16 @@ This project demonstrates how **Data Engineering + Machine Learning + MLOps** co
 
 ## 📚 Table of Contents (Index)
 
-* [Quick Start — Run Locally (Dockerized)](#quick-start--run-locally-dockerized)
-* [Run Locally — Without Docker (Manual)](#run-locally---without-docker-manual)
-* [Architecture](#architecture)
-* [Schemas & ELT](#schemas--elt)
-* [Machine Learning Pipeline](#machine-learning-pipeline)
-* [Streamlit App](#streamlit-app)
-* [Duplicate & Reupload Protection](#duplicate--reupload-protection)
-* [Sample Datasets](#sample-datasets)
-* [Development & Tests](#development--tests)
-* [Contributing](#contributing)
+- [Quick Start — Run Locally (Dockerized)](#quick-start--run-locally-dockerized)
+- [Run Locally — Without Docker (Manual)](#run-locally---without-docker-manual)
+- [Architecture](#architecture)
+- [Schemas & ELT](#schemas--elt)
+- [Machine Learning Pipeline](#machine-learning-pipeline)
+- [Streamlit App](#streamlit-app)
+- [Duplicate & Reupload Protection](#duplicate--reupload-protection)
+- [Sample Datasets](#sample-datasets)
+- [Development & Tests](#development--tests)
+- [Contributing](#contributing)
 
 ---
 
