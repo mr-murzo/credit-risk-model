@@ -216,16 +216,6 @@ Execution status
 
 ---
 
-## 🔁 Duplicate & Reupload Protection
-
-* New uploads processed only when newer than the latest ETL timestamp.
-* Duplicates removed inside files using `DISTINCT ON`.
-* DB-level duplicate protection using `ON CONFLICT (loan_uuid) DO NOTHING`.
-* Faulty rows recorded in `fact.loans_rejects` with reasons.
-* `etl_log` provides run-level auditing (counts, timestamps, status).
-
----
-
 ## 📂 Sample Datasets
 
 * `sample_data folder contains 4 valid sample data and 1 sample with invalid data
