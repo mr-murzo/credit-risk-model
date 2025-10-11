@@ -10,6 +10,8 @@ This project demonstrates how **Data Engineering + Machine Learning + MLOps** co
 
 **Core Stack:** Python (pandas, scikit-learn, imblearn, plotly, streamlit), PostgreSQL, Docker & Docker Compose, SQL stored procedures, environment variables via `.env`.
 
+**ALL FEATURES:** person_age  person_gender  person_education  person_income  person_emp_exp  person_home_owner  loan_amnt  loan_intent  loan_int_rate  loan_percent_income  cb_person_cred_hist_length credit_score  previous_loan_defaults_on_file
+
 ![Architecture Diagram](sample_data/Workflow.png)
 
 ---
