@@ -10,6 +10,8 @@ This project demonstrates how **Data Engineering + Machine Learning + MLOps** co
 
 **Core Stack:** Python (pandas, scikit-learn, imblearn, plotly, streamlit), PostgreSQL, Docker & Docker Compose, SQL stored procedures, environment variables via `.env`.
 
+![Architecture Diagram](sample_data/Workflow.png)
+
 ---
 
 ## ⚙️ Quick Start — Run Locally (Dockerized)
